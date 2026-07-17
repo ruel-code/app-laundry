@@ -1,5 +1,8 @@
 {
     "build": {
-        "builder": "NIXPACKS"
+        "builder": "DOCKERFILE"
+    },
+    "deploy": {
+        "port": 8080
     }
 }

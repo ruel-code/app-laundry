@@ -7,7 +7,7 @@ RUN npm run build
 
 FROM php:8.4-fpm-alpine
 
-RUN apk add --no-cache nginx supervisor sqlite-libs libzip-dev && \
+RUN apk add --no-cache nginx supervisor libzip-dev sqlite-dev sqlite && \
     docker-php-ext-install -j$(nproc) zip pdo_sqlite && \
     mkdir -p /etc/nginx/http.d /run/nginx
 
@@ -21,10 +21,12 @@ COPY docker/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 WORKDIR /app
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction && \
-    cp .env.example .env && \
+RUN set -ex && \
+    composer install --no-dev --optimize-autoloader --no-interaction && \
+    cp -n .env.example .env 2>/dev/null || true && \
     php artisan key:generate --force && \
     touch database/database.sqlite && \
+    chmod 666 database/database.sqlite && \
     php artisan migrate --force && \
     php artisan db:seed --class=DatabaseSeeder --force && \
     php artisan storage:link --force && \
@@ -32,4 +34,4 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction && \
 
 EXPOSE 8080
 
-CMD supervisord -c /etc/supervisord.conf
+CMD supervisord -n -c /etc/supervisord.conf

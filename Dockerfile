@@ -7,6 +7,8 @@ RUN npm run build
 
 FROM serversideup/php:8.4-fpm-nginx
 
+EXPOSE 8080
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY --chown=www-data:www-data . /var/www/html/

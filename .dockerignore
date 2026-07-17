@@ -1,0 +1,13 @@
+.env
+.git
+.gitignore
+node_modules
+npm-debug.log
+vendor
+tests
+test-results
+playwright.config.cjs
+.editorconfig
+.npmrc
+AGENTS.md
+*.md

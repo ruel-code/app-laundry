@@ -17,6 +17,7 @@ COPY . /app
 COPY --from=assets /app/public/build /app/public/build
 COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 COPY docker/supervisord.conf /etc/supervisord.conf
+COPY docker/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 WORKDIR /app
 
@@ -26,7 +27,8 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction && \
     touch database/database.sqlite && \
     php artisan migrate --force && \
     php artisan db:seed --class=DatabaseSeeder --force && \
-    php artisan storage:link --force
+    php artisan storage:link --force && \
+    chown -R www-data:www-data /app/storage /app/database /app/bootstrap/cache /app/public/build
 
 EXPOSE 8080
 

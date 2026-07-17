@@ -8,7 +8,7 @@ RUN npm run build
 FROM php:8.4-fpm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    nginx supervisor libzip-dev sqlite3 \
+    nginx supervisor libzip-dev sqlite3 libsqlite3-dev \
     && docker-php-ext-install -j$(nproc) zip pdo_sqlite \
     && rm -rf /var/lib/apt/lists/*
 

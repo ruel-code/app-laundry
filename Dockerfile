@@ -5,17 +5,20 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM php:8.4-cli
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libzip-dev zip unzip git sqlite3 libsqlite3-dev \
-    && docker-php-ext-install -j$(nproc) zip pdo_sqlite \
-    && rm -rf /var/lib/apt/lists/*
+FROM php:8.4-fpm-alpine
+
+RUN apk add --no-cache nginx supervisor sqlite-libs libzip-dev && \
+    docker-php-ext-install -j$(nproc) zip pdo_sqlite && \
+    mkdir -p /etc/nginx/http.d /run/nginx
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+COPY . /app
+COPY --from=assets /app/public/build /app/public/build
+COPY docker/nginx.conf /etc/nginx/http.d/default.conf
+COPY docker/supervisord.conf /etc/supervisord.conf
+
 WORKDIR /app
-COPY . .
-COPY --from=assets /app/public/build public/build
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction && \
     cp .env.example .env && \
@@ -25,5 +28,6 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction && \
     php artisan db:seed --class=DatabaseSeeder --force && \
     php artisan storage:link --force
 
-EXPOSE 8000
-CMD php -S 0.0.0.0:${PORT:-8000} -t /app/public
+EXPOSE 8080
+
+CMD supervisord -c /etc/supervisord.conf

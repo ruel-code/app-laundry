@@ -27,6 +27,8 @@ RUN set -ex && \
     php artisan migrate --force && \
     php artisan db:seed --class=DatabaseSeeder --force
 
+ENV PORT=8080
+
 EXPOSE 8080
 
-CMD php -S 0.0.0.0:${PORT:-8080} -t /app/public
+CMD php artisan serve --host=0.0.0.0 --port=$PORT
